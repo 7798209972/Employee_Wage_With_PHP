@@ -62,8 +62,25 @@ class EmployeeWage
 		//Closing the file
 		fclose($file);
 
-		//Converting data into json format
-		$json_data = json_encode($employee_data);
+		//Getting old data from file
+		$old_json_data = file_get_contents('employee_wage_output.json');
+
+		//Checking if is not empty
+		if($old_json_data!=null)
+		{
+			//Merging old data with new data
+			$old_data = json_decode($old_json_data);
+			array_push($old_data, $employee_data);
+
+			//Converting data into json format
+			$json_data = json_encode($old_data);
+		}
+		else
+		{
+			//Converting data into json format
+			$json_data = json_encode($employee_data);
+		}
+
 		
 		//Putting json data into output file
 		file_put_contents('employee_wage_output.json', $json_data);
@@ -78,5 +95,8 @@ $object= new EmployeeWage();
 //Calling methods with different employee names
 $object->calculate_wage("Sachin");
 $object->calculate_wage("Satish");
+$object->calculate_wage("Manoj");
+$object->calculate_wage("Ramesh");
+$object->calculate_wage("Mukul");
 
 ?>
