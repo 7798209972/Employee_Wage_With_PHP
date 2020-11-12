@@ -51,17 +51,22 @@ class EmployeeWage
 				//Calculating total number of working hours
 				$total_working_hours+=$hours;
 
-				//Displaying details in tabular format
-        	
-                echo " ".$data[1]." ".$data[3]." ". number_format($daily_wage,2)."\n";
-
         		$day++;
         	}
 		}
+
+		//Putting output as associative array format
+        $employee_data[]=array("employee_name"=>$employee_name, "total_working_hours"=>$total_working_hours, "total_wage"=>$total_wage);
 		
 
 		//Closing the file
 		fclose($file);
+
+		//Converting data into json format
+		$json_data = json_encode($employee_data);
+		
+		//Putting json data into output file
+		file_put_contents('employee_wage_output.json', $json_data);
 
 	}
 
