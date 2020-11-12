@@ -26,17 +26,37 @@ class EmployeeWage
 		//Loop with condition of checking data of file and loop will terminate if file data ends
 		while (($data = fgetcsv($file)) !== false)
 		{
+
 			//Checking employee name
 			if($data[0]==$employee_name)
 			{
+				//Getting values on variable
+				$attendance=$data[2];
+				$hours=$data[3];
 
-				//Displaying details
+				//Checking Employee attandance
+				if($attendance>0)
+				{
+					//Calculation to get per day wage according to work done hours and rate per hour
+					$daily_wage=$rate_per_hour*$hours;
+				}
+				else
+				{
+					$daily_wage=0;
+				}
+
+				//Calculating total wage
+				$total_wage+=$daily_wage;
+
+				//Calculating total number of working hours
+				$total_working_hours+=$hours;
+
+				//Displaying details in tabular format
         	
-                echo " ".$data[1]." ".$data[2]." ". $data[3]."\n";
+                echo " ".$data[1]." ".$data[3]." ". number_format($daily_wage,2)."\n";
 
         		$day++;
         	}
-			
 		}
 		
 
@@ -50,7 +70,8 @@ class EmployeeWage
 //Object creation
 $object= new EmployeeWage();
 
-//Calling methods with employee name
+//Calling methods with different employee names
 $object->calculate_wage("Sachin");
+$object->calculate_wage("Satish");
 
 ?>
