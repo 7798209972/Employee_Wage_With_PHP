@@ -2,7 +2,7 @@
 //Class declaration
 class EmployeeWage
 {
-	//Default constructor to display welcome meaasge
+	//Default constructor to display welcome message
 	public function __construct()
 	{
 		echo "=======================================";
@@ -20,50 +20,77 @@ class EmployeeWage
 		$rate_per_hour=20;
 		$day=0;
 
-		//Opening file with read mode
-		$file = fopen("employee_wage.csv", "r");
-
-		//Loop with condition of checking data of file and loop will terminate if file data ends
-		while (($data = fgetcsv($file)) !== false)
+		//Error handling to check whether the file is exists or not.
+		//It is important to have a csv file to read data from there.
+		try
 		{
-
-			//Checking employee name
-			if($data[0]==$employee_name)
+			if(!file_exists("employee_wage.csv"))		//Checking file exists or not
 			{
-				//Getting values on variable
-				$attendance=$data[2];
-				$hours=$data[3];
-
-				//Checking Employee attandance
-				if($attendance>0)
+				throw new Exception("employee_wage.csv was not found"); 		//Throwning exception
+			}
+			else
+			{
+				//Opening file with read mode
+				$file = fopen("employee_wage.csv", "r");
+				//Loop with condition of checking data of file and loop will terminate if file data ends
+				while (($data = fgetcsv($file)) !== false)
 				{
-					//Calculation to get per day wage according to work done hours and rate per hour
-					$daily_wage=$rate_per_hour*$hours;
+					//Checking employee name
+					if($data[0]==$employee_name)
+					{
+						//Getting values on variable
+						$attendance=$data[2];
+						$hours=$data[3];
+
+						//Checking Employee attandance
+						if($attendance>0)
+						{
+							//Calculation to get per day wage according to work done hours and rate per hour
+							$daily_wage=$rate_per_hour*$hours;
+						}
+						else
+						{
+							$daily_wage=0;
+						}
+
+						$total_wage+=$daily_wage;					//Calculating total wage
+
+						$total_working_hours+=$hours;				//Calculating total number of working hours
+
+						$day++;
+        			}
 				}
-				else
-				{
-					$daily_wage=0;
-				}
-
-				//Calculating total wage
-				$total_wage+=$daily_wage;
-
-				//Calculating total number of working hours
-				$total_working_hours+=$hours;
-
-        		$day++;
-        	}
+			}
 		}
+		catch(Exception $err)			//Handling exception and storing error 
+		{
+			$log_file="error.log";		// Getting filename of log file into a variable
+			$error_message=$err->getMessage();		//Storing Error message thrown by try block
+
+			//Setting error.log file into php.ini file 
+			ini_set("log_errors",TRUE);
+			ini_set("error_log",$log_file);
+			error_log($error_message);			//Storing error message into log file
+			exit();
+		}	
 
 		//Putting output as associative array format
         $employee_data[]=array("employee_name"=>$employee_name, "total_working_hours"=>$total_working_hours, "total_wage"=>$total_wage);
-		
 
-		//Closing the file
-		fclose($file);
+		fclose($file);				//Closing the file
 
+		//Checking whether file exists or not
+		if(!file_exists("employee_wage_output.json"))
+		{
+			touch("employee_wage_output.json");			//Creating file if not exists
+			$json_file="employee_wage_output.json";		//Getting filename into variable
+		}
+		else
+		{
+			$json_file="employee_wage_output.json";		//Getting filename into variable
+		}
 		//Getting old data from file
-		$old_json_data = file_get_contents('employee_wage_output.json');
+		$old_json_data = file_get_contents($json_file);
 
 		//Checking if is not empty
 		if($old_json_data!=null)
@@ -80,23 +107,21 @@ class EmployeeWage
 			//Converting data into json format
 			$json_data = json_encode($employee_data);
 		}
-
 		
 		//Putting json data into output file
-		file_put_contents('employee_wage_output.json', $json_data);
+		file_put_contents($json_file, $json_data);
 
 	}
 
 }
 
-//Object creation
-$object= new EmployeeWage();
+$employee_wage_object= new EmployeeWage();					//Object creation
 
 //Calling methods with different employee names
-$object->calculate_wage("Sachin");
-$object->calculate_wage("Satish");
-$object->calculate_wage("Manoj");
-$object->calculate_wage("Ramesh");
-$object->calculate_wage("Mukul");
+$employee_wage_object->calculate_wage("Sachin");
+$employee_wage_object->calculate_wage("Satish");
+$employee_wage_object->calculate_wage("Manoj");
+$employee_wage_object->calculate_wage("Ramesh");
+$employee_wage_object->calculate_wage("Mukul");
 
 ?>
