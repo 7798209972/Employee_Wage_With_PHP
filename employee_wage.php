@@ -1,7 +1,14 @@
 <?php
+//Setting log_error as true
+ini_set("log_errors",TRUE);
+//Setting error.log file into php.ini file 
+$log_file="error.log";		// Getting filename of log file into a variable
+ini_set("error_log",$log_file);
+
 //Class declaration
 class EmployeeWage
 {
+	Protected $employee_data=array();
 	//Default constructor to display welcome message
 	public function __construct()
 	{
@@ -64,20 +71,20 @@ class EmployeeWage
 		}
 		catch(Exception $err)			//Handling exception and storing error 
 		{
-			$log_file="error.log";		// Getting filename of log file into a variable
+			
 			$error_message=$err->getMessage();		//Storing Error message thrown by try block
-
-			//Setting error.log file into php.ini file 
-			ini_set("log_errors",TRUE);
-			ini_set("error_log",$log_file);
-			error_log($error_message);			//Storing error message into log file
+			error_log($error_message);		//Storing error message into log file
 			exit();
 		}	
 
 		//Putting output as associative array format
-        $employee_data[]=array("employee_name"=>$employee_name, "total_working_hours"=>$total_working_hours, "total_wage"=>$total_wage);
+        $this->employee_data[]=array("employee_name"=>$employee_name, "total_working_hours"=>$total_working_hours, "total_wage"=>$total_wage);
 
 		fclose($file);				//Closing the file
+
+	}
+	function put_json_output()
+	{
 
 		//Checking whether file exists or not
 		if(!file_exists("employee_wage_output.json"))
@@ -97,7 +104,7 @@ class EmployeeWage
 		{
 			//Merging old data with new data
 			$old_data = json_decode($old_json_data);
-			array_push($old_data, $employee_data);
+			array_push($old_data, $this->employee_data);
 
 			//Converting data into json format
 			$json_data = json_encode($old_data);
@@ -105,7 +112,7 @@ class EmployeeWage
 		else
 		{
 			//Converting data into json format
-			$json_data = json_encode($employee_data);
+			$json_data = json_encode($this->employee_data);
 		}
 		
 		//Putting json data into output file
@@ -116,12 +123,12 @@ class EmployeeWage
 }
 
 $employee_wage_object= new EmployeeWage();					//Object creation
-
 //Calling methods with different employee names
 $employee_wage_object->calculate_wage("Sachin");
 $employee_wage_object->calculate_wage("Satish");
 $employee_wage_object->calculate_wage("Manoj");
 $employee_wage_object->calculate_wage("Ramesh");
 $employee_wage_object->calculate_wage("Mukul");
+$employee_wage_object->put_json_output();
 
 ?>
